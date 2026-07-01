@@ -6,8 +6,8 @@ rankUpCosts = {"A": 150, "B": 300, "C": 700, "D": 1530, "E": 3150, "G": 4500, "H
 
 mineAlphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-
-
+#Gives information regarding each mine. "Ores" elucidates ores in the mine, with S = stone, C = coal, I = iron, G = gold, R = redstone, L = lapis, D = diamond, and E = emerald. Abundances provide estimates for the relative abundances of the ores in the mine out of 100.
+#Prices gives exact sell prices for each respective ore. Uniques are upgrades that are attainable in the mine and their respective costs. For example, in Mine E, there is stone, coal, iron, with abundances of 5%, 80%, 15%, with sell prices of 10.29, 14, and 20, respectively.
 mineInfo = {"A": {"Ores": ["S","C","none"],    "Abundances": [95, 5, 0],   "Prices": [2, 2, 0],          "Uniques": {"Pick": ["Gold", 100], "Eff": ["1", 150], "Fortune": []}},
             "B": {"Ores": ["S","C","none"],    "Abundances": [80, 20, 0],  "Prices": [2.52, 3.24, 0],    "Uniques": {"Pick": [], "Eff": [], "Fortune": ["1.33", 300]}},
             "C": {"Ores": ["S","C","none"],    "Abundances": [50, 50, 0],  "Prices": [4.79, 5.85, 0],    "Uniques": {"Pick": [], "Eff": ["2", 400], "Fortune": []}},
@@ -34,9 +34,8 @@ mineInfo = {"A": {"Ores": ["S","C","none"],    "Abundances": [95, 5, 0],   "Pric
             "X": {"Ores": ["D","E","none"],    "Abundances": [50, 50, 0],  "Prices": [41200, 54600, 0],  "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "Y": {"Ores": ["D","E","none"],    "Abundances": [10, 90, 0],  "Prices": [50000, 78000, 0],  "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "Z": {"Ores": ["E","none","none"], "Abundances": [100, 0, 0],  "Prices": [86000, 0, 0],      "Uniques": {"Pick": [], "Eff": ["9", 700000000], "Fortune": []}}}
-#Gives information regarding each mine. "Ores" elucidates ores in the mine, with S = stone, C = coal, I = iron, G = gold, R = redstone, L = lapis, D = diamond, and E = emerald. Abundances provide estimates for the relative abundances of the ores in the mine out of 100.
-#Prices gives exact sell prices for each respective ore. Uniques are upgrades that are attainable in the mine and their respective costs. For example, in Mine E, there is stone, coal, iron, with abundances of 5%, 80%, 15%, with sell prices of 10.29, 14, and 20, respectively.
 
+#Provides raw data for how many seconds it takes to mine a block in the given category for different efficiency levels in ascending order left to right of efficiency 0 to efficiency 9. 0.05 represents instant mining (20 blocks/second).
 mineTime = {
 
     "Wood": {
@@ -214,11 +213,20 @@ mineTime = {
         }
     }
 }
-#Provides raw data for how many seconds it takes to mine a block in the given category for different efficiency levels in ascending order left to right of efficiency 0 to efficiency 9. 0.05 represents instant mining (20 blocks/second).
+
 
 mineIndex = mineAlphabet.index(input("What mine are you in? Enter a capital letter: "))
 sellBonus = float(input("What is your ore sell rate bonus? Enter as a single integer value representing the percent bonus (do not divide by 100): ")) / 100
+rankBonus = float(input("What is your rank up discount? Enter as a single integer value representing the percent bonus (do not divide by 100): ")) / 100
 discriminality = float(input("What is your discriminality factor? 0 denotes no discriminality, 1 is max discriminality: "))
+haste6Count = int(input("How many haste 6 potions do you plan on having for the rest of the prestige? Enter an integer: "))
+haste19Count = int(input("How many haste 19 potions do you plan on having for the rest of the prestige? Enter an integer: "))
+
+def rankCostRectified():
+    rankUpCostsRectified = {}
+    for index in range(0, max(1, mineIndex)):
+        rankUpCostsRectified[mineAlphabet[index]] = rankUpCosts[mineAlphabet[index]] * (1 - rankBonus)
+    return rankUpCostsRectified
 
 def pickMineTable(haste):
     
@@ -339,7 +347,7 @@ def moneyRateTable(haste):
     minePackage = []
     for mine in range(len(abundance)):
         minePackage.append([mineAlphabet[mine]])
-        for index in range(len(abundance[index])-3):
+        for index in range(len(abundance[mine])-3):
             if abundance[mine][index] == 'none':
                 continue
             minePackage[mine].append(abundance[mine][index])
@@ -374,8 +382,27 @@ def moneyRateTable(haste):
             except IndexError:
                 pass
             moneyRates[mineAlphabet[mine]][minePackage[mine][3][pick][0]] = round(pickMoney1, 1)
-    print(moneyRates)
+    
+    print(maxFortune)
+    print(mineOreCostRectified)
+    return moneyRates
                         
-moneyRateTable("haste 0")
+print(moneyRateTable("haste 0"))
+print(moneyRateTable("haste 6"))
+print(moneyRateTable("haste 19"))
+print("---------------")
 
+def rankUpTimeTable():
+    haste0Times = moneyRateTable("haste 0")
+    haste6Times = moneyRateTable("haste 6")
+    haste19Times = moneyRateTable("haste 19")
+    for mine in range(0, max(1, mineIndex)):
+        for pick in moneyRateTable("haste 0")[mineAlphabet[mine]]:
+            haste0Times[mineAlphabet[mine]][pick] = round(rankCostRectified()[mineAlphabet[mine]] / moneyRateTable("haste 0")[mineAlphabet[mine]][pick], 2)
+            haste6Times[mineAlphabet[mine]][pick] = round(rankCostRectified()[mineAlphabet[mine]] / moneyRateTable("haste 6")[mineAlphabet[mine]][pick], 2)
+            haste19Times[mineAlphabet[mine]][pick] = round(rankCostRectified()[mineAlphabet[mine]] / moneyRateTable("haste 19")[mineAlphabet[mine]][pick], 2)
+    print(haste0Times)
+    print(haste6Times)
+    print(haste19Times)
 
+rankUpTimeTable()

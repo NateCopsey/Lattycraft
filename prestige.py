@@ -1,13 +1,13 @@
 import math
 
-rankUpCosts = {"A": 150, "B": 300, "C": 700, "D": 1530, "E": 3150, "G": 4500, "H": 9750, "I": 22500, "J": 36000, "K": 90000, "L": 120000,"M": 135000, "N": 225000, "O": 607500,
+rankUpCosts = {"A": 150, "B": 300, "C": 700, "D": 1530, "E": 3150, "F": 4500, "G": 9750, "H": 22500, "I": 36000, "J": 52500, "K": 90000, "L": 120000,"M": 135000, "N": 225000, "O": 607500,
                "P": 742500, "Q": 1575000, "R": 5175000, "S": 8325000, "T": 24750000, "U": 45000000, "V": 60750000, "W": 213750000, "X": 261000000, "Y": 722250000, "Z": 2000000000}
 #Gives raw costs for the rankup in each mine, e.g. in mine A, it costs 150 sapphires to rankup to B. 
 
 mineAlphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-
-
+#Gives information regarding each mine. "Ores" elucidates ores in the mine, with S = stone, C = coal, I = iron, G = gold, R = redstone, L = lapis, D = diamond, and E = emerald. Abundances provide estimates for the relative abundances of the ores in the mine out of 100.
+#Prices gives exact sell prices for each respective ore. Uniques are upgrades that are attainable in the mine and their respective costs. For example, in Mine E, there is stone, coal, iron, with abundances of 5%, 80%, 15%, with sell prices of 10.29, 14, and 20, respectively.
 mineInfo = {"A": {"Ores": ["S","C","none"],    "Abundances": [95, 5, 0],   "Prices": [2, 2, 0],          "Uniques": {"Pick": ["Gold", 100], "Eff": ["1", 150], "Fortune": []}},
             "B": {"Ores": ["S","C","none"],    "Abundances": [80, 20, 0],  "Prices": [2.52, 3.24, 0],    "Uniques": {"Pick": [], "Eff": [], "Fortune": ["1.33", 300]}},
             "C": {"Ores": ["S","C","none"],    "Abundances": [50, 50, 0],  "Prices": [4.79, 5.85, 0],    "Uniques": {"Pick": [], "Eff": ["2", 400], "Fortune": []}},
@@ -22,7 +22,7 @@ mineInfo = {"A": {"Ores": ["S","C","none"],    "Abundances": [95, 5, 0],   "Pric
             "L": {"Ores": ["G","R","none"],    "Abundances": [75, 25, 0],  "Prices": [180, 248, 0],      "Uniques": {"Pick": [], "Eff": ["5", 115000], "Fortune": []}},
             "M": {"Ores": ["G","R","none"],    "Abundances": [50, 50, 0],  "Prices": [203, 248, 0],      "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "N": {"Ores": ["G","R","L"],       "Abundances": [40, 55, 5],  "Prices": [203, 280, 430],    "Uniques": {"Pick": [], "Eff": [], "Fortune": ["2.20", 220000]}},
-            "O": {"Ores": ["G","R","L"],       "Abundances": [10, 45, 45], "Prices": [210, 315, 430],    "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
+            "O": {"Ores": ["G","R","L"],       "Abundances": [10, 60, 30], "Prices": [210, 315, 430],    "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "P": {"Ores": ["R","L","none"],    "Abundances": [50, 50, 0],  "Prices": [315, 471, 0],      "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "Q": {"Ores": ["R","L","D"],       "Abundances": [40, 55, 5],  "Prices": [315, 678, 1251],   "Uniques": {"Pick": ["Diamond", 1500000], "Eff": [], "Fortune": []}},
             "R": {"Ores": ["R","L","D"],       "Abundances": [5, 65, 30],  "Prices": [965, 1950, 2000],  "Uniques": {"Pick": [], "Eff": ["6", 5000000], "Fortune": []}},
@@ -34,198 +34,212 @@ mineInfo = {"A": {"Ores": ["S","C","none"],    "Abundances": [95, 5, 0],   "Pric
             "X": {"Ores": ["D","E","none"],    "Abundances": [50, 50, 0],  "Prices": [41200, 54600, 0],  "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "Y": {"Ores": ["D","E","none"],    "Abundances": [10, 90, 0],  "Prices": [50000, 78000, 0],  "Uniques": {"Pick": [], "Eff": [], "Fortune": []}},
             "Z": {"Ores": ["E","none","none"], "Abundances": [100, 0, 0],  "Prices": [86000, 0, 0],      "Uniques": {"Pick": [], "Eff": ["9", 700000000], "Fortune": []}}}
-#Gives information regarding each mine. "Ores" elucidates ores in the mine, with S = stone, C = coal, I = iron, G = gold, R = redstone, L = lapis, D = diamond, and E = emerald. Abundances provide estimates for the relative abundances of the ores in the mine out of 100.
-#Prices gives exact sell prices for each respective ore. Uniques are upgrades that are attainable in the mine and their respective costs. For example, in Mine E, there is stone, coal, iron, with abundances of 5%, 80%, 15%, with sell prices of 10.29, 14, and 20, respectively.
 
+#Provides raw data for how many seconds it takes to mine a block in the given category for different efficiency levels in ascending order left to right of efficiency 0 to efficiency 9. 0.05 represents instant mining (20 blocks/second).
+#Note that if the pickaxe cannot insta-mine, then there is a built-in delay of 0.3 seconds between breaking one block and starting to break another; 0.3 seconds have been added to every value in this table if it was greater than 0.05 to compensate for this fact.
 mineTime = {
 
     "Wood": {
         "haste 0": {
-            "S": [1.15,0.6,0.35,0.2,0.15,0.1,0.1,0.05,0.05,0.05],
-            "C": [2.25,1.15,0.65,0.4,0.25,0.2,0.15,0.1,0.1,0.1],
-            "I": [7.5,3.75,2.15,1.25,0.8,0.55,0.4,0.3,0.25,0.2],
-            "L": [7.5,3.75,2.15,1.25,0.8,0.55,0.4,0.3,0.25,0.2],
-            "G": [7.5,3.75,2.15,1.25,0.8,0.55,0.4,0.3,0.25,0.2],
-            "R": [7.5,3.75,2.15,1.25,0.8,0.55,0.4,0.3,0.25,0.2],
-            "D": [7.5,3.75,2.15,1.25,0.8,0.55,0.4,0.3,0.25,0.2],
-            "E": [7.5,3.75,2.15,1.25,0.8,0.55,0.4,0.3,0.25,0.2]},
-
+            "S": [1.45,0.9,0.65,0.5,0.45,0.4,0.4,0.05,0.05,0.05],
+            "C": [2.55,1.45,0.95,0.7,0.55,0.5,0.45,0.4,0.4,0.4],
+            "I": [7.8,4.05,2.45,1.55,1.1,0.85,0.7,0.6,0.55,0.5],
+            "L": [7.8,4.05,2.45,1.55,1.1,0.85,0.7,0.6,0.55,0.5],
+            "G": [7.8,4.05,2.45,1.55,1.1,0.85,0.7,0.6,0.55,0.5],
+            "R": [7.8,4.05,2.45,1.55,1.1,0.85,0.7,0.6,0.55,0.5],
+            "D": [7.8,4.05,2.45,1.55,1.1,0.85,0.7,0.6,0.55,0.5],
+            "E": [7.8,4.05,2.45,1.55,1.1,0.85,0.7,0.6,0.55,0.5]
+        },
 
         "haste 6": {
-            "S": [0.55,0.3,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05],
-            "C": [1.05,0.55,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05],
-            "I": [3.45,1.75,1,0.6,0.4,0.25,0.2,0.15,0.15,0.1],
-            "L": [3.45,1.75,1,0.6,0.4,0.25,0.2,0.15,0.15,0.1],
-            "G": [3.45,1.75,1,0.6,0.4,0.25,0.2,0.15,0.15,0.1],
-            "R": [3.45,1.75,1,0.6,0.4,0.25,0.2,0.15,0.15,0.1],
-            "D": [3.45,1.75,1,0.6,0.4,0.25,0.2,0.15,0.15,0.1],
-            "E": [3.45,1.75,1,0.6,0.4,0.25,0.2,0.15,0.15,0.1]
+            "S": [0.85,0.6,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05],
+            "C": [1.35,0.85,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05],
+            "I": [3.75,2.05,1.3,0.9,0.7,0.55,0.5,0.45,0.45,0.4],
+            "L": [3.75,2.05,1.3,0.9,0.7,0.55,0.5,0.45,0.45,0.4],
+            "G": [3.75,2.05,1.3,0.9,0.7,0.55,0.5,0.45,0.45,0.4],
+            "R": [3.75,2.05,1.3,0.9,0.7,0.55,0.5,0.45,0.45,0.4],
+            "D": [3.75,2.05,1.3,0.9,0.7,0.55,0.5,0.45,0.45,0.4],
+            "E": [3.75,2.05,1.3,0.9,0.7,0.55,0.5,0.45,0.45,0.4]
         },
 
         "haste 19": {
-            "S": [0.25,0.15,0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.5,0.25,0.15,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "I": [1.6,0.8,0.45,0.3,0.2,0.15,0.1,0.1,0.05,0.05],
-            "L": [1.6,0.8,0.45,0.3,0.2,0.15,0.1,0.1,0.05,0.05],
-            "G": [1.6,0.8,0.45,0.3,0.2,0.15,0.1,0.1,0.05,0.05],
-            "R": [1.6,0.8,0.45,0.3,0.2,0.15,0.1,0.1,0.05,0.05],
-            "D": [1.6,0.8,0.45,0.3,0.2,0.15,0.1,0.1,0.05,0.05],
-            "E": [1.6,0.8,0.45,0.3,0.2,0.15,0.1,0.1,0.05,0.05]
+            "S": [0.55,0.45,0.4,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.8,0.55,0.45,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "I": [1.9,1.1,0.75,0.6,0.5,0.45,0.4,0.4,0.05,0.05],
+            "L": [1.9,1.1,0.75,0.6,0.5,0.45,0.4,0.4,0.05,0.05],
+            "G": [1.9,1.1,0.75,0.6,0.5,0.45,0.4,0.4,0.05,0.05],
+            "R": [1.9,1.1,0.75,0.6,0.5,0.45,0.4,0.4,0.05,0.05],
+            "D": [1.9,1.1,0.75,0.6,0.5,0.45,0.4,0.4,0.05,0.05],
+            "E": [1.9,1.1,0.75,0.6,0.5,0.45,0.4,0.4,0.05,0.05]
         }
     },
 
     "Gold": {
         "haste 0": {
-            "S": [0.2,0.2,0.15,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "C": [0.4,0.35,0.3,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "I": [1.25,1.1,0.9,0.7,0.55,0.4,0.35,0.25,0.2,0.2],
-            "L": [1.25,1.1,0.9,0.7,0.55,0.4,0.35,0.25,0.2,0.2],
-            "G": [1.25,1.1,0.9,0.7,0.55,0.4,0.35,0.25,0.2,0.2],
-            "R": [1.25,1.1,0.9,0.7,0.55,0.4,0.35,0.25,0.2,0.2],
-            "D": [1.25,1.1,0.9,0.7,0.55,0.4,0.35,0.25,0.2,0.2],
-            "E": [1.25,1.1,0.9,0.7,0.55,0.4,0.35,0.25,0.2,0.2]
+            "S": [0.5,0.5,0.45,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "C": [0.7,0.65,0.6,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "I": [1.55,1.4,1.2,1.0,0.85,0.7,0.65,0.55,0.5,0.5],
+            "L": [1.55,1.4,1.2,1.0,0.85,0.7,0.65,0.55,0.5,0.5],
+            "G": [1.55,1.4,1.2,1.0,0.85,0.7,0.65,0.55,0.5,0.5],
+            "R": [1.55,1.4,1.2,1.0,0.85,0.7,0.65,0.55,0.5,0.5],
+            "D": [1.55,1.4,1.2,1.0,0.85,0.7,0.65,0.55,0.5,0.5],
+            "E": [1.55,1.4,1.2,1.0,0.85,0.7,0.65,0.55,0.5,0.5]
         },
 
         "haste 6": {
-            "S": [0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05],
-            "I": [0.6,0.5,0.45,0.35,0.25,0.2,0.15,0.15,0.1,0.1],
-            "L": [0.6,0.5,0.45,0.35,0.25,0.2,0.15,0.15,0.1,0.1],
-            "G": [0.6,0.5,0.45,0.35,0.25,0.2,0.15,0.15,0.1,0.1],
-            "R": [0.6,0.5,0.45,0.35,0.25,0.2,0.15,0.15,0.1,0.1],
-            "D": [0.6,0.5,0.45,0.35,0.25,0.2,0.15,0.15,0.1,0.1],
-            "E": [0.6,0.5,0.45,0.35,0.25,0.2,0.15,0.15,0.1,0.1]
+            "S": [0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05],
+            "I": [0.9,0.8,0.75,0.65,0.55,0.5,0.45,0.45,0.4,0.4],
+            "L": [0.9,0.8,0.75,0.65,0.55,0.5,0.45,0.45,0.4,0.4],
+            "G": [0.9,0.8,0.75,0.65,0.55,0.5,0.45,0.45,0.4,0.4],
+            "R": [0.9,0.8,0.75,0.65,0.55,0.5,0.45,0.45,0.4,0.4],
+            "D": [0.9,0.8,0.75,0.65,0.55,0.5,0.45,0.45,0.4,0.4],
+            "E": [0.9,0.8,0.75,0.65,0.55,0.5,0.45,0.45,0.4,0.4]
         },
 
         "haste 19": {
             "S": [0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "I": [0.3,0.25,0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05],
-            "L": [0.3,0.25,0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05],
-            "G": [0.3,0.25,0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05],
-            "R": [0.3,0.25,0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05],
-            "D": [0.3,0.25,0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05],
-            "E": [0.3,0.25,0.2,0.15,0.15,0.1,0.1,0.1,0.05,0.05]
+            "C": [0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+            "I": [0.6,0.55,0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05],
+            "L": [0.6,0.55,0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05],
+            "G": [0.6,0.55,0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05],
+            "R": [0.6,0.55,0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05],
+            "D": [0.6,0.55,0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05],
+            "E": [0.6,0.55,0.5,0.45,0.45,0.4,0.4,0.4,0.05,0.05]
         }
     },
-
     "Stone": {
         "haste 0": {
-            "S": [0.6,0.4,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05],
-            "C": [1.15,0.75,0.5,0.35,0.25,0.15,0.15,0.1,0.1,0.1],
-            "I": [1.15,0.75,0.5,0.35,0.25,0.15,0.15,0.1,0.1,0.1],
-            "L": [1.15,0.75,0.5,0.35,0.25,0.15,0.15,0.1,0.1,0.1],
-            "G": [3.75,2.5,1.7,1.1,0.75,0.5,0.4,0.3,0.25,0.2],
-            "R": [3.75,2.5,1.7,1.1,0.75,0.5,0.4,0.3,0.25,0.2],
-            "D": [3.75,2.5,1.7,1.1,0.75,0.5,0.4,0.3,0.25,0.2],
-            "E": [3.75,2.5,1.7,1.1,0.75,0.5,0.4,0.3,0.25,0.2]
+            "S": [0.9,0.7,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05],
+            "C": [1.45,1.05,0.8,0.65,0.55,0.45,0.45,0.4,0.4,0.4],
+            "I": [1.45,1.05,0.8,0.65,0.55,0.45,0.45,0.4,0.4,0.4],
+            "L": [1.45,1.05,0.8,0.65,0.55,0.45,0.45,0.4,0.4,0.4],
+            "G": [4.05,2.8,2.0,1.4,1.05,0.8,0.7,0.6,0.55,0.5],
+            "R": [4.05,2.8,2.0,1.4,1.05,0.8,0.7,0.6,0.55,0.5],
+            "D": [4.05,2.8,2.0,1.4,1.05,0.8,0.7,0.6,0.55,0.5],
+            "E": [4.05,2.8,2.0,1.4,1.05,0.8,0.7,0.6,0.55,0.5]
         },
 
         "haste 6": {
-            "S": [0.3,0.2,0.15,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.55,0.35,0.25,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "I": [0.55,0.35,0.25,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "L": [0.55,0.35,0.25,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "G": [1.75,1.15,0.8,0.5,0.35,0.25,0.2,0.15,0.1,0.1],
-            "R": [1.75,1.15,0.8,0.5,0.35,0.25,0.2,0.15,0.1,0.1],
-            "D": [1.75,1.15,0.8,0.5,0.35,0.25,0.2,0.15,0.1,0.1],
-            "E": [1.75,1.15,0.8,0.5,0.35,0.25,0.2,0.15,0.1,0.1]
+            "S": [0.6,0.5,0.45,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.85,0.65,0.55,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "I": [0.85,0.65,0.55,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "L": [0.85,0.65,0.55,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "G": [2.05,1.45,1.1,0.8,0.65,0.55,0.5,0.45,0.4,0.4],
+            "R": [2.05,1.45,1.1,0.8,0.65,0.55,0.5,0.45,0.4,0.4],
+            "D": [2.05,1.45,1.1,0.8,0.65,0.55,0.5,0.45,0.4,0.4],
+            "E": [2.05,1.45,1.1,0.8,0.65,0.55,0.5,0.45,0.4,0.4]
         },
 
         "haste 19": {
-            "S": [0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.25,0.2,0.15,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "I": [0.25,0.2,0.15,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "L": [0.25,0.2,0.15,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "G": [0.8,0.55,0.35,0.25,0.15,0.15,0.1,0.1,0.05,0.05],
-            "R": [0.8,0.55,0.35,0.25,0.15,0.15,0.1,0.1,0.05,0.05],
-            "D": [0.8,0.55,0.35,0.25,0.15,0.15,0.1,0.1,0.05,0.05],
-            "E": [0.8,0.55,0.35,0.25,0.15,0.15,0.1,0.1,0.05,0.05]
+            "S": [0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.55,0.5,0.45,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "I": [0.55,0.5,0.45,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "L": [0.55,0.5,0.45,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "G": [1.1,0.85,0.65,0.55,0.45,0.45,0.4,0.4,0.05,0.05],
+            "R": [1.1,0.85,0.65,0.55,0.45,0.45,0.4,0.4,0.05,0.05],
+            "D": [1.1,0.85,0.65,0.55,0.45,0.45,0.4,0.4,0.05,0.05],
+            "E": [1.1,0.85,0.65,0.55,0.45,0.45,0.4,0.4,0.05,0.05]
         }
     },
 
     "Iron": {
         "haste 0": {
-            "S": [0.4,0.3,0.25,0.15,0.1,0.1,0.1,0.05,0.05,0.05],
-            "C": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1],
-            "I": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1],
-            "L": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1],
-            "G": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1],
-            "R": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1],
-            "D": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1],
-            "E": [0.75,0.6,0.45,0.3,0.2,0.15,0.15,0.1,0.1,0.1]
+            "S": [0.7,0.6,0.55,0.45,0.4,0.4,0.4,0.05,0.05,0.05],
+            "C": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4],
+            "I": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4],
+            "L": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4],
+            "G": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4],
+            "R": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4],
+            "D": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4],
+            "E": [1.05,0.9,0.75,0.6,0.5,0.45,0.45,0.4,0.4,0.4]
         },
 
         "haste 6": {
-            "S": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "I": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "L": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "G": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "R": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "D": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "E": [0.35,0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05]
+            "S": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "I": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "L": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "G": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "R": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "D": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "E": [0.65,0.6,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05]
         },
 
         "haste 19": {
-            "S": [0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "I": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "L": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "G": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "R": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "D": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "E": [0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]
+            "S": [0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "I": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "L": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "G": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "R": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "D": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "E": [0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05]
         }
     },
-
     "Diamond": {
         "haste 0": {
-            "S": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "C": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "I": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "L": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "G": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "R": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "D": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05],
-            "E": [0.6,0.45,0.35,0.25,0.2,0.15,0.1,0.1,0.1,0.05]
+            "S": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "C": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "I": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "L": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "G": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "R": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "D": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05],
+            "E": [0.9,0.75,0.65,0.55,0.5,0.45,0.4,0.4,0.4,0.05]
         },
 
         "haste 6": {
-            "S": [0.15,0.15,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "I": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "L": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "G": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "R": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "D": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05],
-            "E": [0.3,0.25,0.2,0.15,0.1,0.1,0.05,0.05,0.05,0.05]
+            "S": [0.45,0.45,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "I": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "L": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "G": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "R": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "D": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05],
+            "E": [0.6,0.55,0.5,0.45,0.4,0.4,0.05,0.05,0.05,0.05]
         },
 
         "haste 19": {
-            "S": [0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
-            "C": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "I": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "L": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "G": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "R": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "D": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05],
-            "E": [0.15,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]
+            "S": [0.4,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05],
+            "C": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "I": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "L": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "G": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "R": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "D": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05],
+            "E": [0.45,0.4,0.4,0.4,0.05,0.05,0.05,0.05,0.05,0.05]
         }
     }
 }
-#Provides raw data for how many seconds it takes to mine a block in the given category for different efficiency levels in ascending order left to right of efficiency 0 to efficiency 9. 0.05 represents instant mining (20 blocks/second).
 
-mineIndex = mineAlphabet.index(input("What mine are you in? Enter a capital letter: "))
+
+mineIndexGlobal = mineAlphabet.index(input("What mine are you in? Enter a capital letter: "))
 sellBonus = float(input("What is your ore sell rate bonus? Enter as a single integer value representing the percent bonus (do not divide by 100): ")) / 100
+rankBonus = float(input("What is your rank up discount? Enter as a single integer value representing the percent bonus (do not divide by 100): ")) / 100
 discriminality = float(input("What is your discriminality factor? 0 denotes no discriminality, 1 is max discriminality: "))
+haste6Count = int(input("How many haste 6 potions do you plan on having for the rest of the prestige? Enter an integer: "))
+haste19Count = int(input("How many haste 19 potions do you plan on having for the rest of the prestige? Enter an integer: "))
+enchantments = True
+if input("Will you use enchantments this play through? If not, enter 0: ") == "0":
+    enchantments = False
 
-def pickMineTable(haste):
+def rankCostRectified(mineIndex):
+    rankUpCostsRectified = {}
+    for index in range(0, max(1, mineIndex+1)):
+        rankUpCostsRectified[mineAlphabet[index]] = rankUpCosts[mineAlphabet[index]] * (1 - rankBonus)
+    return rankUpCostsRectified
+
+def pickMineTable(haste, mineIndex, enchantSelection):
     
     Picks = [['Wood', 0]]
     pickSpeeds = {"Wood": {}}
     for index in range(0, mineIndex + 1):
-        if mineInfo[mineAlphabet[index]]["Uniques"]["Eff"] != []:            #Finds the maximum efficiency given the current rank and its associated cost.
+        if enchantments == False:
+            maxEfficiency = ["0", 0]
+        elif enchantSelection == 0 and mineInfo[mineAlphabet[index - 1]]["Uniques"]["Eff"] != []:
+            maxEfficiency = mineInfo[mineAlphabet[index - 1]]["Uniques"]["Eff"]
+        elif mineInfo[mineAlphabet[index]]["Uniques"]["Eff"] != []:            #Finds the maximum efficiency given the current rank and its associated cost.
             maxEfficiency = mineInfo[mineAlphabet[index]]["Uniques"]["Eff"]
         if mineInfo[mineAlphabet[index]]["Uniques"]["Pick"] != []:
             Picks += [(mineInfo[mineAlphabet[index]]["Uniques"]["Pick"])]    #Finds the available picks given the current rank and their associated costs.
@@ -298,7 +312,7 @@ def adjust_row(row, prices, d):
     ]
 
         
-def moneyRateTable(haste):
+def moneyRateTable(haste, mineIndex, enchantSelection):
     moneyRates = {}
     mineOreCostRectified = {}
     maxFortune = []
@@ -313,13 +327,17 @@ def moneyRateTable(haste):
                     mineOreCostRectified[mineInfo[mineAlphabet[index]]["Ores"][oreIndex]] = mineInfo[mineAlphabet[index]]["Prices"][oreIndex] * (1 + sellBonus)          #mineOreCostRectified represents the maximum value an ore will sell for given your current rank; for example, if you mined coal
                                                                                                                                                                          #in B mine but were rank G you could sell it for $18 instead of only $3.24.                                                                                                                                              
   
-        for picks in pickMineTable(haste):
+        for picks in pickMineTable(haste, mineIndex, enchantSelection):
             pickList[picks] = 0
         moneyRates[mineAlphabet[index]] = pickList                               #Constructs and initializes the moneyRates dictionary given the current rank. 
-        if mineInfo[mineAlphabet[index]]["Uniques"]["Fortune"] != []:     #Finds the maximum fortune given the current rank and its associated cost.
+        if enchantments == False:
+            maxFortune = ["1", 0]
+        elif enchantSelection == 0 and mineInfo[mineAlphabet[index - 1]]["Uniques"]["Fortune"] != []:
+            maxFortune = mineInfo[mineAlphabet[index - 1]]["Uniques"]["Pick"]
+        elif mineInfo[mineAlphabet[index]]["Uniques"]["Fortune"] != []:     #Finds the maximum fortune given the current rank and its associated cost.
             maxFortune = mineInfo[mineAlphabet[index]]["Uniques"]["Fortune"]
     
-    pickTimeTable = pickMineTable(haste)
+    pickTimeTable = pickMineTable(haste, mineIndex, enchantSelection)
     
     #The following for loop packages the relevant ore abundances according to the input mine level as a list with the format [(mine A): [ore1, ore2, ore3, abundance1, abundance2, abundance 3], (mine B): ...]
     abundance = []
@@ -339,7 +357,7 @@ def moneyRateTable(haste):
     minePackage = []
     for mine in range(len(abundance)):
         minePackage.append([mineAlphabet[mine]])
-        for index in range(len(abundance[index])-3):
+        for index in range(len(abundance[mine])-3):
             if abundance[mine][index] == 'none':
                 continue
             minePackage[mine].append(abundance[mine][index])
@@ -364,7 +382,7 @@ def moneyRateTable(haste):
                     pickMoney1 += (minePackage[mine][5] / 100) * (1 / minePackage[mine][6][pick][1]) * mineOreCostRectified[minePackage[mine][4]]
                 else:
                     pickMoney1 += (minePackage[mine][5] / 100) * (1 / minePackage[mine][6][pick][1]) * mineOreCostRectified[minePackage[mine][4]] * float(maxFortune[0])
-            except IndexError:   #This try/except block is necessary since not all mines have 3 or even 2 ores. 
+            except IndexError:   #This try/except block is necessary since not all mines have 2+ ores. 
                 pass
             try: 
                 if minePackage[mine][7] in ['S','I','G']:
@@ -373,9 +391,34 @@ def moneyRateTable(haste):
                     pickMoney1 += (minePackage[mine][8] / 100) * (1 / minePackage[mine][9][pick][1]) * mineOreCostRectified[minePackage[mine][7]] * float(maxFortune[0])
             except IndexError:
                 pass
-            moneyRates[mineAlphabet[mine]][minePackage[mine][3][pick][0]] = round(pickMoney1, 1)
-    print(moneyRates)
-                        
-moneyRateTable("haste 0")
+            moneyRates[mineAlphabet[mine]][minePackage[mine][3][pick][0]] = pickMoney1
+    
+    return moneyRates
 
+def rankUpTimeTable(mineIndex, enchantSelection):
+    haste0Times = moneyRateTable("haste 0", mineIndex, enchantSelection)
+    haste6Times = moneyRateTable("haste 6", mineIndex, enchantSelection)
+    haste19Times = moneyRateTable("haste 19", mineIndex, enchantSelection)
+    hasteListTimes = []
+    for mine in range(0, max(1, mineIndex + 1)):
+        for pick in moneyRateTable("haste 0", mineIndex, enchantSelection)[mineAlphabet[mine]]:
+            haste0Times[mineAlphabet[mine]][pick] = round(rankCostRectified(mineIndex)[mineAlphabet[mine]] / moneyRateTable("haste 0", mineIndex, enchantSelection)[mineAlphabet[mine]][pick], 2)
+            haste6Times[mineAlphabet[mine]][pick] = round(rankCostRectified(mineIndex)[mineAlphabet[mine]] / moneyRateTable("haste 6", mineIndex, enchantSelection)[mineAlphabet[mine]][pick], 2)
+            haste19Times[mineAlphabet[mine]][pick] = round(rankCostRectified(mineIndex)[mineAlphabet[mine]] / moneyRateTable("haste 19", mineIndex, enchantSelection)[mineAlphabet[mine]][pick], 2)
+    hasteListTimes.append(haste0Times)
+    hasteListTimes.append(haste6Times)
+    hasteListTimes.append(haste19Times)
 
+    return hasteListTimes
+
+for index in range(mineIndexGlobal+1):
+    for mine in mineAlphabet[index]:
+        print(mine, rankUpTimeTable(index, 0)[0][mine])
+        print(mine, rankUpTimeTable(index, 0)[1][mine])
+        print(mine, rankUpTimeTable(index, 0)[2][mine])
+        print("----")
+        print(mine, rankUpTimeTable(index, 1)[0][mine])
+        print(mine, rankUpTimeTable(index, 1)[1][mine])
+        print(mine, rankUpTimeTable(index, 1)[2][mine])
+
+    print("\n")
